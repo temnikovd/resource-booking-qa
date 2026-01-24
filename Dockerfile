@@ -14,19 +14,9 @@ RUN mvn -q -B package -DskipTests
 # =========================
 # Runtime stage
 # =========================
-FROM eclipse-temurin:17-jre-alpine
+FROM amazoncorretto:17-alpine3.18 AS runtime
 
 WORKDIR /app
-
 COPY --from=builder /app/target/*.jar app.jar
-
-# =========================
-# Environment variables
-# =========================
-ENV QA_TEST_ADMIN_CREATION_SECRET=""
-ENV JWT_SECRET=""
-ENV JWT_EXPIRATION_SECONDS="3600"
-
-EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

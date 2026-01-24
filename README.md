@@ -132,11 +132,11 @@ qa-test:
   admin-creation-secret: "change-me-in-prod"
 ```
 
-JWT configuration:
+JWT configuration, secret should be at least 32 characters long:
 
 ```
 jwt:
-  secret: "change-me-to-a-strong-secret-key"
+  secret: "x9G4kqV2Lw7cR8tZ1fM3pQ6sU9vB2nH5"
   expiration-seconds: 3600
 ```
 
@@ -164,7 +164,7 @@ Run container:
 docker run \
   -p 8080:8080 \
   -e QA_TEST_ADMIN_CREATION_SECRET="my-admin-secret" \
-  -e JWT_SECRET="my-very-strong-secret" \
+  -e JWT_SECRET="x9G4kqV2Lw7cR8tZ1fM3pQ6sU9vB2nH5" \
   -e JWT_EXPIRATION_SECONDS=3600 \
   qa-test-app
 ```
