@@ -12,7 +12,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Auth", description = "Authentication endpoints (Basic + JWT)")
+@Tag(
+        name = "Auth",
+        description = """
+                Authentication endpoints.
+                
+                This API supports two authentication mechanisms:
+                - HTTP Basic Auth (email + password)
+                - Bearer JWT token (obtained from this controller)
+                
+                In Swagger UI you can use either Basic or Bearer "Authorize" to call protected endpoints.
+                """
+)
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -23,7 +34,13 @@ public class AuthController {
 
     @Operation(
             summary = "Login and obtain JWT",
-            description = "Authenticates user using email and password and returns a JWT token."
+            description = """
+                    Authenticates a user using email and password and returns a JWT token.
+                    
+                    This endpoint itself does NOT require prior authentication.
+                    The returned token can be used as Bearer token for subsequent requests.
+                    """,
+            security = {} // override global security, login is public
     )
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)

@@ -27,6 +27,14 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/api/auth/login"
+                        ).permitAll()
                         // public registration
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
