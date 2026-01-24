@@ -22,7 +22,7 @@ import java.util.List;
         name = "Bookings",
         description = """
                 Booking API for creating, reading, updating and cancelling bookings.
-
+                
                 Business rules enforced:
                 - Rule 6: Slot must be in the future to be bookable
                 - Rule 7: Slot must be in the future to cancel booking
@@ -66,7 +66,7 @@ public class BookingController {
             summary = "Create a new booking",
             description = """
                     Creates a new booking for a slot.
-
+                    
                     Business rules:
                     - Rule 6: Slot must start in the future
                     - Rule 8: Only owning user or ADMIN may create booking
@@ -96,7 +96,7 @@ public class BookingController {
             summary = "Update booking status",
             description = """
                     Updates the status of a booking.
-
+                    
                     This endpoint does not currently enforce ownership or admin rules.
                     Intended for testing status transitions and error handling.
                     """
@@ -117,7 +117,7 @@ public class BookingController {
             summary = "Cancel booking",
             description = """
                     Cancels an existing booking.
-
+                    
                     Business rules:
                     - Rule 7: Slot must start in the future to cancel booking
                     - Rule 8: Only owning user or ADMIN may cancel booking
