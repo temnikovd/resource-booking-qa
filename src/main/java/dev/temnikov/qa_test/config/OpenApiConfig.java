@@ -16,14 +16,27 @@ import org.springframework.context.annotation.Configuration;
                 title = "QA Test Slot Booking API",
                 version = "1.0",
                 description = """
-                        Backend for practicing automated testing scenarios.
-
-                        The API exposes user, resource, slot and booking endpoints.
-                        Detailed business rules are described separately in RULES.md.
+                        Backend for practicing automated testing scenarios around booking workflows.
+                        
+                        Domain:
+                        - Users: registration, role management (USER / ADMIN).
+                        - Resources: bookable entities (rooms, courts, etc.), ADMIN-only writes.
+                        - Slots: time ranges attached to resources, ADMIN-only writes, non-overlapping and future-only.
+                        - Bookings: reservations of slots by users, subject to business rules.
+                        
+                        Authentication:
+                        - HTTP Basic Auth (email + password) OR
+                        - Bearer JWT token (obtained via /api/auth/login).
+                        
+                        Authorization:
+                        - USER: can view resources/slots and manage own bookings.
+                        - ADMIN: can manage users, resources, slots and create/cancel bookings for any user.
+                        
+                        Detailed business rules are described in RULES.md and are enforced by the service layer.
                         """
         ),
         servers = {
-                @Server(url = "http://localhost:8080", description = "Local server")
+                @Server(url = "http://localhost:8080", description = "Local development server")
         }
 )
 public class OpenApiConfig {
@@ -46,7 +59,8 @@ public class OpenApiConfig {
                         .addSecuritySchemes("BasicAuth", basicAuthScheme)
                         .addSecuritySchemes("BearerAuth", bearerAuthScheme)
                 )
-                // These entries represent alternative security mechanisms (Basic OR Bearer).
+                // Global security: every endpoint requires either Basic or Bearer,
+                // unless an operation explicitly overrides security = {}.
                 .addSecurityItem(new SecurityRequirement().addList("BasicAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
     }
