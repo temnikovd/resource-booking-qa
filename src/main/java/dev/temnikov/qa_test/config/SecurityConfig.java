@@ -27,28 +27,20 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/info",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/api/auth/login"
-                        ).permitAll()
+                        // public registration
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
+                        // admin resources
                         .requestMatchers(HttpMethod.POST, "/api/resources/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/resources/**").authenticated()
 
+                        // admin slots
                         .requestMatchers(HttpMethod.POST, "/api/slots/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/slots/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/slots/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/slots/**").authenticated()
 
-                        .requestMatchers("/api/bookings/**").authenticated()
-                        .requestMatchers("/api/users/**").authenticated()
-
+                        // all other endpoints
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
