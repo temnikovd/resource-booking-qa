@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: qa-test
+  jpa:
+    hibernate:
+      ddl-auto: update    # или create-drop на раннем этапе
+    show-sql: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+qa-test:
+  admin-creation-secret: "secretsecretpass"
+jwt:
+  secret: "change-me-to-a-strong-secret-key"
+  expiration-seconds: 3600
