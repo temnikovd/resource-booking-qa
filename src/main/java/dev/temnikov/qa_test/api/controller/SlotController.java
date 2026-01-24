@@ -9,6 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import dev.temnikov.qa_test.api.dto.PageResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
+import org.springdoc.core.annotations.ParameterObject;
 
 import java.util.List;
 
@@ -33,17 +38,28 @@ public class SlotController {
 
     private final SlotService slotService;
 
+    @GetMapping
     @Operation(
-            summary = "Get all slots",
-            description = "Returns all slots. Requires authentication (USER or ADMIN)."
+            summary = "Get all slots (paginated)",
+            description = """
+                    Returns a paginated list of slots.
+
+                    Query parameters:
+                    - page, size, sort (e.g. sort=startTime,asc)
+
+                    Requires authentication (USER or ADMIN).
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Slots returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    @GetMapping
-    public List<SlotDto> getAll() {
-        return slotService.getAll();
+    public PageResponse<SlotDto> getAll(
+            @ParameterObject
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        return slotService.getAll(pageable);
     }
 
     @Operation(

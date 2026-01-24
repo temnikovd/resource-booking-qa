@@ -1,5 +1,6 @@
 package dev.temnikov.qa_test.api.controller;
 
+import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.dto.UserDto;
 import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,10 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,9 +35,14 @@ public class UserController {
 
     @GetMapping
     @Operation(
-            summary = "Get all users",
+            summary = "Get all users (paginated)",
             description = """
-                    Returns all users.
+                    Returns a paginated list of users.
+                    
+                    Query parameters:
+                    - page: zero-based page index (default 0)
+                    - size: page size (default 20)
+                    - sort: sorting, e.g. sort=id,asc or sort=email,asc
                     
                     Requires authentication (USER or ADMIN).
                     """
@@ -43,8 +51,12 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Users returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public List<UserDto> getAll() {
-        return userService.getAll();
+    public PageResponse<UserDto> getAll(
+            @ParameterObject
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        return userService.getAll(pageable);
     }
 
     @GetMapping("/{id}")
@@ -70,15 +82,15 @@ public class UserController {
     @Operation(
             summary = "Create a new user",
             description = """
-                Registers a new user with role USER or ADMIN.
-                
-                Business rules:
-                - Rule 1: Creating ADMIN requires `X-Admin-Secret` header with a valid secret.
-                - Rule 2: `password` is required for any user creation.
-                
-                This endpoint is intentionally left unauthenticated to allow open registration flows.
-                Password is write-only and never returned in API responses.
-                """,
+                    Registers a new user with role USER or ADMIN.
+                    
+                    Business rules:
+                    - Rule 1: Creating ADMIN requires `X-Admin-Secret` header with a valid secret.
+                    - Rule 2: `password` is required for any user creation.
+                    
+                    This endpoint is intentionally left unauthenticated to allow open registration flows.
+                    Password is write-only and never returned in API responses.
+                    """,
             security = {} // override global security, registration is public
     )
     @ApiResponses({
@@ -96,11 +108,11 @@ public class UserController {
     @Operation(
             summary = "Update existing user",
             description = """
-                Updates user fields. Password change is optional.
-                
-                Changing role from USER to ADMIN requires `X-Admin-Secret` (Rule 1).
-                Requires authentication.
-                """
+                    Updates user fields. Password change is optional.
+                    
+                    Changing role from USER to ADMIN requires `X-Admin-Secret` (Rule 1).
+                    Requires authentication.
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated"),
