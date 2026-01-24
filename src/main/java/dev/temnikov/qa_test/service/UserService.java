@@ -10,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import dev.temnikov.qa_test.api.dto.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.List;
 
@@ -20,12 +24,23 @@ public class UserService {
     private final UserRepository userRepository;
     private final AdminConfig adminConfig;
 
-    public List<UserDto> getAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserMapper::toDto)
-                .toList();
+
+    public PageResponse<UserDto> getAll(Pageable pageable) {
+        Page<User> page = userRepository.findAll(pageable);
+
+        return new PageResponse<>(
+                page.getContent()
+                        .stream()
+                        .map(UserMapper::toDto)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
+
 
     public UserDto getById(Long id) {
         User user = userRepository.findById(id)

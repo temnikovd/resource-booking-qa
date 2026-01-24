@@ -1,11 +1,14 @@
 package dev.temnikov.qa_test.service;
 
+import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.dto.SlotDto;
 import dev.temnikov.qa_test.api.mapper.SlotMapper;
 import dev.temnikov.qa_test.entity.Resource;
 import dev.temnikov.qa_test.entity.Slot;
 import dev.temnikov.qa_test.repository.SlotRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,11 +24,20 @@ public class SlotService {
     private final SlotRepository slotRepository;
     private final ResourceService resourceService;
 
-    public List<SlotDto> getAll() {
-        return slotRepository.findAll()
-                .stream()
-                .map(SlotMapper::toDto)
-                .toList();
+    public PageResponse<SlotDto> getAll(Pageable pageable) {
+        Page<Slot> page = slotRepository.findAll(pageable);
+
+        return new PageResponse<>(
+                page.getContent()
+                        .stream()
+                        .map(SlotMapper::toDto)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
 
     public SlotDto getById(Long id) {

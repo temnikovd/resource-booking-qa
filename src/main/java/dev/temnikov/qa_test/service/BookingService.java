@@ -1,20 +1,18 @@
 package dev.temnikov.qa_test.service;
 
 import dev.temnikov.qa_test.api.dto.BookingDto;
+import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.mapper.BookingMapper;
-import dev.temnikov.qa_test.entity.Booking;
-import dev.temnikov.qa_test.entity.BookingStatus;
-import dev.temnikov.qa_test.entity.Slot;
-import dev.temnikov.qa_test.entity.User;
-import dev.temnikov.qa_test.entity.UserRole;
+import dev.temnikov.qa_test.entity.*;
 import dev.temnikov.qa_test.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +22,23 @@ public class BookingService {
     private final SlotService slotService;
     private final UserService userService;
 
-    public List<BookingDto> getAll() {
-        return bookingRepository.findAll()
-                .stream()
-                .map(BookingMapper::toDto)
-                .toList();
+
+    public PageResponse<BookingDto> getAll(Pageable pageable) {
+        Page<Booking> page = bookingRepository.findAll(pageable);
+
+        return new PageResponse<>(
+                page.getContent()
+                        .stream()
+                        .map(BookingMapper::toDto)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
+
 
     public BookingDto getById(Long id) {
         Booking booking = bookingRepository.findById(id)

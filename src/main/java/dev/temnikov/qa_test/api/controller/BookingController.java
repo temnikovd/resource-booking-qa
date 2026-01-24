@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.api.controller;
 
 import dev.temnikov.qa_test.api.dto.BookingDto;
+import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.entity.User;
 import dev.temnikov.qa_test.service.BookingService;
 import dev.temnikov.qa_test.service.UserService;
@@ -12,11 +13,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Tag(
         name = "Bookings",
@@ -38,9 +42,14 @@ public class BookingController {
     private final UserService userService;
 
     @Operation(
-            summary = "Get all bookings",
+            summary = "Get all bookings (paginated)",
             description = """
-                    Returns all bookings in the system.
+                    Returns a paginated list of bookings.
+                    
+                    Query parameters:
+                    - page: zero-based page index (default 0)
+                    - size: page size (default 20)
+                    - sort: sorting, e.g. sort=id,asc or sort=startTime,desc
                     
                     Requires authentication (USER or ADMIN).
                     """
@@ -50,8 +59,12 @@ public class BookingController {
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
     @GetMapping
-    public List<BookingDto> getAll() {
-        return bookingService.getAll();
+    public PageResponse<BookingDto> getAll(
+            @ParameterObject
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        return bookingService.getAll(pageable);
     }
 
     @Operation(

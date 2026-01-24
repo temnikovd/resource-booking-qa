@@ -1,5 +1,6 @@
 package dev.temnikov.qa_test.api.controller;
 
+import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.dto.ResourceDto;
 import dev.temnikov.qa_test.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,10 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/resources")
@@ -28,17 +31,28 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
+    @GetMapping
     @Operation(
-            summary = "Get all resources",
-            description = "Returns all resources. Requires authentication (USER or ADMIN)."
+            summary = "Get all resources (paginated)",
+            description = """
+                    Returns a paginated list of resources.
+                    
+                    Query parameters:
+                    - page, size, sort (e.g. sort=name,asc)
+                    
+                    Requires authentication (USER or ADMIN).
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Resources returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    @GetMapping
-    public List<ResourceDto> getAll() {
-        return resourceService.getAll();
+    public PageResponse<ResourceDto> getAll(
+            @ParameterObject
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+        return resourceService.getAll(pageable);
     }
 
     @Operation(
