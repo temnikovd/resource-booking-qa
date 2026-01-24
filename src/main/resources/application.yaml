@@ -13,5 +13,5 @@ management:
 qa-test:
   admin-creation-secret: "secretsecretpass"
 jwt:
-  secret: "change-me-to-a-strong-secret-key"
+  secret: "x9G4kqV2Lw7cR8tZ1fM3pQ6sU9vB2nH5"
   expiration-seconds: 3600
