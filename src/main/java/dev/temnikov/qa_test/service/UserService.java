@@ -51,7 +51,7 @@ public class UserService {
             );
         }
 
-        if (dto.role() != null && dto.role().equalsIgnoreCase(UserRole.ADMIN.name())) {
+        if (dto.role() != null && dto.role().equals(UserRole.ADMIN)) {
             String requiredSecret = adminConfig.getAdminCreationSecret();
             if (adminSecretFromRequest == null || !adminSecretFromRequest.equals(requiredSecret)) {
                 throw new ResponseStatusException(
@@ -72,9 +72,8 @@ public class UserService {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // 1) если меняем роль на ADMIN — требуем секрет
         if (dto.role() != null
-                && dto.role().equalsIgnoreCase(UserRole.ADMIN.name())
+                && dto.role().equals(UserRole.ADMIN)
                 && existing.getRole() != UserRole.ADMIN) {
 
             String requiredSecret = adminConfig.getAdminCreationSecret();
@@ -86,14 +85,10 @@ public class UserService {
             }
         }
 
-        // 2) обновляем поля
         existing.setEmail(dto.email());
         existing.setFullName(dto.fullName());
-        if (dto.role() != null) {
-            existing.setRole(UserRole.valueOf(dto.role()));
-        }
+        existing.setRole(dto.role());
 
-        // 3) если в апдейте передан password — меняем его
         if (dto.password() != null && !dto.password().isBlank()) {
             existing.setPassword(dto.password());
         }

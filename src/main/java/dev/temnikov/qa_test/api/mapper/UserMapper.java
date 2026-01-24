@@ -2,7 +2,6 @@ package dev.temnikov.qa_test.api.mapper;
 
 import dev.temnikov.qa_test.api.dto.UserDto;
 import dev.temnikov.qa_test.entity.User;
-import dev.temnikov.qa_test.entity.UserRole;
 
 public class UserMapper {
 
@@ -14,7 +13,7 @@ public class UserMapper {
                 user.getId(),
                 user.getEmail(),
                 user.getFullName(),
-                user.getRole() != null ? user.getRole().name() : null,
+                user.getRole() != null ? user.getRole() : null,
                 null
         );
     }
@@ -27,9 +26,7 @@ public class UserMapper {
         user.setId(dto.id());
         user.setEmail(dto.email());
         user.setFullName(dto.fullName());
-        if (dto.role() != null) {
-            user.setRole(UserRole.valueOf(dto.role()));
-        }
+        user.setRole(user.getRole());
         user.setPassword(dto.password());
         return user;
     }
