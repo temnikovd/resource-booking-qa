@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final SlotService slotService;
+    private final SessionService sessionService;
     private final UserService userService;
 
 
@@ -51,8 +51,8 @@ public class BookingService {
      * Slot must be in the future.
      */
     public BookingDto create(BookingDto dto, User currentUser) {
-        if (dto.slotId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "slotId is required");
+        if (dto.sessionId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sessionId is required");
         }
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current user is required");
@@ -68,10 +68,10 @@ public class BookingService {
         }
 
         User user = userService.getEntityById(targetUserId);
-        Slot slot = slotService.getEntityById(dto.slotId());
+        Session session = sessionService.getEntityById(dto.sessionId());
 
         LocalDateTime now = LocalDateTime.now();
-        if (!slot.getStartTime().isAfter(now)) {
+        if (!session.getStartTime().isAfter(now)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Slot must be in the future to create booking"
@@ -80,7 +80,7 @@ public class BookingService {
 
         Booking booking = new Booking();
         booking.setUser(user);
-        booking.setSlot(slot);
+        booking.setSession(session);
         booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
@@ -99,10 +99,10 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
-        Slot slot = booking.getSlot();
+        Session session = booking.getSession();
         LocalDateTime now = LocalDateTime.now();
 
-        if (!slot.getStartTime().isAfter(now)) {
+        if (!session.getStartTime().isAfter(now)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Slot must be in the future to cancel booking"

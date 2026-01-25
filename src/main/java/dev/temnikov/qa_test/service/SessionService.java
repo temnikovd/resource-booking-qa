@@ -1,11 +1,11 @@
 package dev.temnikov.qa_test.service;
 
 import dev.temnikov.qa_test.api.dto.PageResponse;
-import dev.temnikov.qa_test.api.dto.SlotDto;
-import dev.temnikov.qa_test.api.mapper.SlotMapper;
-import dev.temnikov.qa_test.entity.Resource;
-import dev.temnikov.qa_test.entity.Slot;
-import dev.temnikov.qa_test.repository.SlotRepository;
+import dev.temnikov.qa_test.api.dto.SessionDto;
+import dev.temnikov.qa_test.api.mapper.SessionMapper;
+import dev.temnikov.qa_test.entity.Course;
+import dev.temnikov.qa_test.entity.Session;
+import dev.temnikov.qa_test.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +19,18 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SlotService {
+public class SessionService {
 
-    private final SlotRepository slotRepository;
-    private final ResourceService resourceService;
+    private final SessionRepository sessionRepository;
+    private final CourseService courseService;
 
-    public PageResponse<SlotDto> getAll(Pageable pageable) {
-        Page<Slot> page = slotRepository.findAll(pageable);
+    public PageResponse<SessionDto> getAll(Pageable pageable) {
+        Page<Session> page = sessionRepository.findAll(pageable);
 
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(SlotMapper::toDto)
+                        .map(SessionMapper::toDto)
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
@@ -40,45 +40,45 @@ public class SlotService {
         );
     }
 
-    public SlotDto getById(Long id) {
-        Slot slot = slotRepository.findById(id)
+    public SessionDto getById(Long id) {
+        Session session = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
-        return SlotMapper.toDto(slot);
+        return SessionMapper.toDto(session);
     }
 
-    public SlotDto create(SlotDto dto) {
-        if (dto.resourceId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "resourceId is required");
+    public SessionDto create(SessionDto dto) {
+        if (dto.courseId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "courseId is required");
         }
         if (dto.startTime() == null || dto.endTime() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startTime and endTime are required");
         }
 
-        Resource resource = resourceService.getEntityById(dto.resourceId());
+        Course aCourse = courseService.getEntityById(dto.courseId());
 
         LocalDateTime start = normalizeToMinutes(dto.startTime());
         LocalDateTime end = normalizeToMinutes(dto.endTime());
 
         validateSlotTimeRange(start, end);
         validateSlotInFuture(start);
-        validateNoOverlap(resource.getId(), start, end, null);
+        validateNoOverlap(aCourse.getId(), start, end, null);
 
-        Slot slot = new Slot();
-        slot.setResource(resource);
-        slot.setStartTime(start);
-        slot.setEndTime(end);
+        Session session = new Session();
+        session.setCourse(aCourse);
+        session.setStartTime(start);
+        session.setEndTime(end);
 
-        Slot saved = slotRepository.save(slot);
-        return SlotMapper.toDto(saved);
+        Session saved = sessionRepository.save(session);
+        return SessionMapper.toDto(saved);
     }
 
-    public SlotDto update(Long id, SlotDto dto) {
-        Slot existing = slotRepository.findById(id)
+    public SessionDto update(Long id, SessionDto dto) {
+        Session existing = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
 
-        Resource resource = existing.getResource();
-        if (dto.resourceId() != null && !dto.resourceId().equals(resource.getId())) {
-            resource = resourceService.getEntityById(dto.resourceId());
+        Course aCourse = existing.getCourse();
+        if (dto.courseId() != null && !dto.courseId().equals(aCourse.getId())) {
+            aCourse = courseService.getEntityById(dto.courseId());
         }
 
         LocalDateTime start = dto.startTime() != null ? dto.startTime() : existing.getStartTime();
@@ -89,25 +89,25 @@ public class SlotService {
 
         validateSlotTimeRange(start, end);
         validateSlotInFuture(start);
-        validateNoOverlap(resource.getId(), start, end, existing.getId());
+        validateNoOverlap(aCourse.getId(), start, end, existing.getId());
 
-        existing.setResource(resource);
+        existing.setCourse(aCourse);
         existing.setStartTime(start);
         existing.setEndTime(end);
 
-        Slot saved = slotRepository.save(existing);
-        return SlotMapper.toDto(saved);
+        Session saved = sessionRepository.save(existing);
+        return SessionMapper.toDto(saved);
     }
 
     public void delete(Long id) {
-        if (!slotRepository.existsById(id)) {
+        if (!sessionRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found");
         }
-        slotRepository.deleteById(id);
+        sessionRepository.deleteById(id);
     }
 
-    public Slot getEntityById(Long id) {
-        return slotRepository.findById(id)
+    public Session getEntityById(Long id) {
+        return sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
     }
 
@@ -142,7 +142,7 @@ public class SlotService {
                                    LocalDateTime end,
                                    Long currentSlotId) {
 
-        List<Slot> overlapping = slotRepository.findOverlappingSlots(resourceId, start, end);
+        List<Session> overlapping = sessionRepository.findOverlappingSessions(resourceId, start, end);
 
         boolean hasConflict = overlapping.stream()
                 .anyMatch(slot -> currentSlotId == null || !slot.getId().equals(currentSlotId));

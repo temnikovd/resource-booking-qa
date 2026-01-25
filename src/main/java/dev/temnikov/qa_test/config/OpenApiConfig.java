@@ -13,26 +13,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "QA Test Slot Booking API",
+                title = "QA Test Gym Booking API",
                 version = "1.0",
                 description = """
-                        Backend for practicing automated testing scenarios around booking workflows.
-                        
+                        Backend for practicing automated testing scenarios around gym-style booking workflows.
+
                         Domain:
-                        - Users: registration, role management (USER / ADMIN).
-                        - Resources: bookable entities (rooms, courts, etc.), ADMIN-only writes.
-                        - Slots: time ranges attached to resources, ADMIN-only writes, non-overlapping and future-only.
-                        - Bookings: reservations of slots by users, subject to business rules.
-                        
+                        - Users: authentication + business role (USER / TRAINER / ADMIN)
+                        - Courses: types of activities (e.g. Yoga, Boxing), ADMIN-only writes
+                        - Sessions: scheduled occurrences of courses, ADMIN-only writes
+                        - Bookings: reservations of sessions by users, subject to business rules
+
                         Authentication:
                         - HTTP Basic Auth (email + password) OR
-                        - Bearer JWT token (obtained via /api/auth/login).
-                        
+                        - Bearer JWT token (obtained via /api/auth/login)
+
                         Authorization:
-                        - USER: can view resources/slots and manage own bookings.
-                        - ADMIN: can manage users, resources, slots and create/cancel bookings for any user.
-                        
-                        Detailed business rules are described in RULES.md and are enforced by the service layer.
+                        - USER: may view courses/sessions and book sessions (up to capacity)
+                        - TRAINER: same as USER; may be assigned to run Courses/Sessions
+                        - ADMIN: may manage users, courses, sessions and override bookings
+
+                        Reference:
+                        Detailed business rules are documented in RULES.md and enforced by the service layer.
                         """
         ),
         servers = {
@@ -59,8 +61,8 @@ public class OpenApiConfig {
                         .addSecuritySchemes("BasicAuth", basicAuthScheme)
                         .addSecuritySchemes("BearerAuth", bearerAuthScheme)
                 )
-                // Global security: every endpoint requires either Basic or Bearer,
-                // unless an operation explicitly overrides security = {}.
+                // Global security: every endpoint requires either Basic or Bearer
+                // unless an operation explicitly sets security = {}.
                 .addSecurityItem(new SecurityRequirement().addList("BasicAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
     }

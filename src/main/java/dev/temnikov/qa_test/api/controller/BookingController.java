@@ -25,12 +25,14 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Bookings",
         description = """
-                Booking API for creating, reading, updating and cancelling bookings.
-                
-                Key business rules (see RULES.md for full details):
-                - Rule 6: Slot must start in the future to be bookable.
-                - Rule 7: Slot must start in the future to allow cancellation.
-                - Rule 8: Only the owning user or an ADMIN may create or cancel a booking.
+                API for booking scheduled sessions of a course.
+
+                Business rules (short form):
+                - Sessions must start in the future to be bookable.
+                - Sessions must start in the future to be cancellable.
+                - Only the owning user or an ADMIN may create or cancel a booking.
+
+                See RULES.md for the full list of constraints enforced by the service layer.
                 """
 )
 @RestController
@@ -42,20 +44,20 @@ public class BookingController {
     private final UserService userService;
 
     @Operation(
-            summary = "Get all bookings (paginated)",
+            summary = "List bookings (paginated)",
             description = """
-                    Returns a paginated list of bookings.
-                    
+                    Returns paginated bookings for administrative and testing scenarios.
+
                     Query parameters:
                     - page: zero-based page index (default 0)
                     - size: page size (default 20)
-                    - sort: sorting, e.g. sort=id,asc or sort=startTime,desc
-                    
-                    Requires authentication (USER or ADMIN).
+                    - sort: field and direction (e.g. sort=id,asc or sort=startTime,desc)
+
+                    Requires authentication (USER / TRAINER / ADMIN).
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "List of bookings returned successfully"),
+            @ApiResponse(responseCode = "200", description = "Bookings returned successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
     @GetMapping
@@ -68,11 +70,11 @@ public class BookingController {
     }
 
     @Operation(
-            summary = "Get booking by id",
+            summary = "Get booking by ID",
             description = """
-                    Returns a single booking by its identifier.
-                    
-                    Requires authentication (USER or ADMIN).
+                    Returns a specific booking.
+
+                    Requires authentication.
                     """
     )
     @ApiResponses({
@@ -86,23 +88,25 @@ public class BookingController {
     }
 
     @Operation(
-            summary = "Create a new booking",
+            summary = "Create a booking",
             description = """
-                    Creates a new booking for a slot.
-                    
+                    Books a session for a user.
+
                     Business rules:
-                    - Rule 6: Slot must start in the future.
-                    - Rule 8: Only owning user or ADMIN may create a booking.
-                      * If userId is omitted, the booking is created for the current user.
-                      * If userId is provided, the caller must either be that user or have ADMIN role.
+                    - Session must start in the future.
+                    - Caller must either be the booking owner or have ADMIN role.
+                      * If userId is omitted in the payload, the current user is assumed.
+                      * If userId is provided, the caller must match or be ADMIN.
+
+                    Requires authentication.
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Booking created",
                     content = @Content(schema = @Schema(implementation = BookingDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input or slot is not in the future"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or session is not in the future"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Caller is not allowed to create a booking for the given user")
+            @ApiResponse(responseCode = "403", description = "Not allowed to create booking for the specified user")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -118,10 +122,12 @@ public class BookingController {
     @Operation(
             summary = "Update booking status",
             description = """
-                    Updates the status of an existing booking.
-                    
-                    This endpoint does not currently enforce ownership or ADMIN checks and
-                    is intended for exploring state transitions and error handling in tests.
+                    Modifies the status of a booking.
+
+                    This endpoint is intentionally permissive to support testing of
+                    state transitions and invalid scenarios.
+
+                    Requires authentication.
                     """
     )
     @ApiResponses({
@@ -138,21 +144,23 @@ public class BookingController {
     }
 
     @Operation(
-            summary = "Cancel booking",
+            summary = "Cancel a booking",
             description = """
-                    Cancels an existing booking.
-                    
+                    Cancels a booking.
+
                     Business rules:
-                    - Rule 7: Slot must start in the future to allow cancellation.
-                    - Rule 8: Only owning user or ADMIN may cancel a booking.
+                    - Session must start in the future.
+                    - Only owning user or ADMIN may cancel.
+
+                    Requires authentication.
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Booking cancelled",
                     content = @Content(schema = @Schema(implementation = BookingDto.class))),
-            @ApiResponse(responseCode = "400", description = "Slot is not in the future, cancellation forbidden"),
+            @ApiResponse(responseCode = "400", description = "Session is not in the future"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Caller is not owner and not ADMIN"),
+            @ApiResponse(responseCode = "403", description = "Not allowed to cancel booking"),
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @PatchMapping("/{id}/cancel")
@@ -168,10 +176,9 @@ public class BookingController {
     @Operation(
             summary = "Delete booking",
             description = """
-                    Deletes a booking by id.
-                    
-                    Intended mainly for cleanup in tests.
-                    Requires authentication (USER or ADMIN).
+                    Deletes a booking by ID.
+
+                    Requires authentication.
                     """
     )
     @ApiResponses({

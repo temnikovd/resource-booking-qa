@@ -7,18 +7,18 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "slots")
+@Table(name = "session")
 @Data
 @NoArgsConstructor
-public class Slot {
+public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "resource_id")
-    private Resource resource;
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Column(nullable = false)
     private LocalDateTime startTime;
