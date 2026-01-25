@@ -6,6 +6,7 @@ import dev.temnikov.qa_test.entity.User;
 import dev.temnikov.qa_test.service.CourseService;
 import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -102,6 +103,7 @@ public class CourseController {
             @ApiResponse(responseCode = "422", description = "Invalid trainer or trainerId missing")
     })
     public CourseDto create(@RequestBody CourseDto dto,
+                            @Parameter(hidden = true)
                             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
         User currentUser = userService.getEntityByEmail(principal.getUsername());
         return courseService.create(dto, currentUser);
