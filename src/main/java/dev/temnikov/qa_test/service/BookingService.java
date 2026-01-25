@@ -48,7 +48,7 @@ public class BookingService {
 
     /**
      * Only owner (dto.userId) or ADMIN can create booking.
-     * Slot must be in the future.
+     * Session must be in the future.
      */
     public BookingDto create(BookingDto dto, User currentUser) {
         if (dto.sessionId() == null) {
@@ -74,7 +74,7 @@ public class BookingService {
         if (!session.getStartTime().isAfter(now)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Slot must be in the future to create booking"
+                    "Session must be in the future to create booking"
             );
         }
 
@@ -89,7 +89,7 @@ public class BookingService {
 
     /**
      * Only owner or ADMIN may cancel.
-     * Slot must be in the future to cancel.
+     * Session must be in the future to cancel.
      */
     public BookingDto cancel(Long id, User currentUser) {
         if (currentUser == null) {
@@ -105,7 +105,7 @@ public class BookingService {
         if (!session.getStartTime().isAfter(now)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Slot must be in the future to cancel booking"
+                    "Session must be in the future to cancel booking"
             );
         }
 

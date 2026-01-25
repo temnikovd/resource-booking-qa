@@ -38,15 +38,15 @@ public class SecurityConfig {
                         // public registration
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
-                        // admin resources
-                        .requestMatchers(HttpMethod.POST, "/api/resources/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/resources/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/resources/**").hasRole("ADMIN")
+                        // admin courses
+                        .requestMatchers(HttpMethod.POST, "/api/courses/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
 
-                        // admin slots
-                        .requestMatchers(HttpMethod.POST, "/api/slots/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/slots/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/slots/**").hasRole("ADMIN")
+                        // admin sessions
+                        .requestMatchers(HttpMethod.POST, "/api/sessions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/sessions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/sessions/**").hasRole("ADMIN")
 
                         // all other endpoints
                         .anyRequest().authenticated()

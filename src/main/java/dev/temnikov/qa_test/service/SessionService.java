@@ -42,7 +42,7 @@ public class SessionService {
 
     public SessionDto getById(Long id) {
         Session session = sessionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
         return SessionMapper.toDto(session);
     }
 
@@ -54,17 +54,17 @@ public class SessionService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startTime and endTime are required");
         }
 
-        Course aCourse = courseService.getEntityById(dto.courseId());
+        Course course = courseService.getEntityById(dto.courseId());
 
         LocalDateTime start = normalizeToMinutes(dto.startTime());
         LocalDateTime end = normalizeToMinutes(dto.endTime());
 
-        validateSlotTimeRange(start, end);
-        validateSlotInFuture(start);
-        validateNoOverlap(aCourse.getId(), start, end, null);
+        validateSessionTimeRange(start, end);
+        validateSessionInFuture(start);
+        validateNoOverlap(course.getId(), start, end, null);
 
         Session session = new Session();
-        session.setCourse(aCourse);
+        session.setCourse(course);
         session.setStartTime(start);
         session.setEndTime(end);
 
@@ -74,11 +74,11 @@ public class SessionService {
 
     public SessionDto update(Long id, SessionDto dto) {
         Session existing = sessionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
 
-        Course aCourse = existing.getCourse();
-        if (dto.courseId() != null && !dto.courseId().equals(aCourse.getId())) {
-            aCourse = courseService.getEntityById(dto.courseId());
+        Course course = existing.getCourse();
+        if (dto.courseId() != null && !dto.courseId().equals(course.getId())) {
+            course = courseService.getEntityById(dto.courseId());
         }
 
         LocalDateTime start = dto.startTime() != null ? dto.startTime() : existing.getStartTime();
@@ -87,11 +87,11 @@ public class SessionService {
         start = normalizeToMinutes(start);
         end = normalizeToMinutes(end);
 
-        validateSlotTimeRange(start, end);
-        validateSlotInFuture(start);
-        validateNoOverlap(aCourse.getId(), start, end, existing.getId());
+        validateSessionTimeRange(start, end);
+        validateSessionInFuture(start);
+        validateNoOverlap(course.getId(), start, end, existing.getId());
 
-        existing.setCourse(aCourse);
+        existing.setCourse(course);
         existing.setStartTime(start);
         existing.setEndTime(end);
 
@@ -101,14 +101,14 @@ public class SessionService {
 
     public void delete(Long id) {
         if (!sessionRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found");
         }
         sessionRepository.deleteById(id);
     }
 
     public Session getEntityById(Long id) {
         return sessionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
     }
 
     private LocalDateTime normalizeToMinutes(LocalDateTime dateTime) {
@@ -118,39 +118,39 @@ public class SessionService {
         return dateTime.truncatedTo(ChronoUnit.MINUTES);
     }
 
-    private void validateSlotTimeRange(LocalDateTime start, LocalDateTime end) {
+    private void validateSessionTimeRange(LocalDateTime start, LocalDateTime end) {
         if (!end.isAfter(start)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Slot endTime must be after startTime"
+                    "Session endTime must be after startTime"
             );
         }
     }
 
-    private void validateSlotInFuture(LocalDateTime start) {
+    private void validateSessionInFuture(LocalDateTime start) {
         LocalDateTime now = LocalDateTime.now();
         if (!start.isAfter(now)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Slot startTime must be in the future"
+                    "Session startTime must be in the future"
             );
         }
     }
 
-    private void validateNoOverlap(Long resourceId,
+    private void validateNoOverlap(Long courseId,
                                    LocalDateTime start,
                                    LocalDateTime end,
-                                   Long currentSlotId) {
+                                   Long currentSessionId) {
 
-        List<Session> overlapping = sessionRepository.findOverlappingSessions(resourceId, start, end);
+        List<Session> overlapping = sessionRepository.findOverlappingSessions(courseId, start, end);
 
         boolean hasConflict = overlapping.stream()
-                .anyMatch(slot -> currentSlotId == null || !slot.getId().equals(currentSlotId));
+                .anyMatch(session -> currentSessionId == null || !session.getId().equals(currentSessionId));
 
         if (hasConflict) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Slot overlaps with existing slot for this resource"
+                    "Session overlaps with existing session for this course"
             );
         }
     }
