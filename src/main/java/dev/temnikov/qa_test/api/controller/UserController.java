@@ -44,7 +44,7 @@ public class UserController {
                     - size: page size (default 20)
                     - sort: sorting, e.g. sort=id,asc or sort=email,asc
                     
-                    Requires authentication (USER or ADMIN).
+                    Requires authentication (USER, ADMIN or TRAINER).
                     """
     )
     @ApiResponses({
@@ -65,7 +65,7 @@ public class UserController {
             description = """
                     Returns a single user by id.
                     
-                    Requires authentication (USER or ADMIN).
+                    Requires authentication (USER, ADMIN or TRAINER).
                     """
     )
     @ApiResponses({
@@ -82,7 +82,7 @@ public class UserController {
     @Operation(
             summary = "Create a new user",
             description = """
-                    Registers a new user with role USER or ADMIN.
+                    Registers a new user with role USER, ADMIN or TRAINER.
                     
                     Business rules:
                     - Rule 1: Creating ADMIN requires `X-Admin-Secret` header with a valid secret.

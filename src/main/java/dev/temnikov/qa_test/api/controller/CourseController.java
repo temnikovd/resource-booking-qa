@@ -3,6 +3,7 @@ package dev.temnikov.qa_test.api.controller;
 import dev.temnikov.qa_test.api.dto.CourseDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.entity.User;
+import dev.temnikov.qa_test.security.SecurityUser;
 import dev.temnikov.qa_test.service.CourseService;
 import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,7 +105,7 @@ public class CourseController {
     })
     public CourseDto create(@RequestBody CourseDto dto,
                             @Parameter(hidden = true)
-                            @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
+                            @AuthenticationPrincipal SecurityUser principal) {
         User currentUser = userService.getEntityByEmail(principal.getUsername());
         return courseService.create(dto, currentUser);
     }

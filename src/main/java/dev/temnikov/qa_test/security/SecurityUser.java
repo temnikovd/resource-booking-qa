@@ -23,18 +23,17 @@ public class SecurityUser implements UserDetails {
         if (role == null) {
             return List.of();
         }
-        // ROLE_ADMIN / ROLE_USER
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword(); // сейчас без шифрования
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail(); // логинимся по email
+        return user.getEmail();
     }
 
     @Override
@@ -54,6 +53,6 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // при желании можно добавить поле isActive в User
+        return true;
     }
 }
