@@ -1,10 +1,10 @@
 package dev.temnikov.qa_test.service;
 
 import dev.temnikov.qa_test.api.dto.PageResponse;
-import dev.temnikov.qa_test.api.dto.ResourceDto;
-import dev.temnikov.qa_test.api.mapper.ResourceMapper;
-import dev.temnikov.qa_test.entity.Resource;
-import dev.temnikov.qa_test.repository.ResourceRepository;
+import dev.temnikov.qa_test.api.dto.ClassDto;
+import dev.temnikov.qa_test.api.mapper.ClassMapper;
+import dev.temnikov.qa_test.entity.Course;
+import dev.temnikov.qa_test.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,17 +14,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
-public class ResourceService {
+public class CourseService {
 
-    private final ResourceRepository resourceRepository;
+    private final CourseRepository courseRepository;
 
-    public PageResponse<ResourceDto> getAll(Pageable pageable) {
-        Page<Resource> page = resourceRepository.findAll(pageable);
+    public PageResponse<ClassDto> getAll(Pageable pageable) {
+        Page<Course> page = courseRepository.findAll(pageable);
 
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(ResourceMapper::toDto)
+                        .map(ClassMapper::toDto)
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
@@ -34,38 +34,38 @@ public class ResourceService {
         );
     }
 
-    public ResourceDto getById(Long id) {
-        Resource resource = resourceRepository.findById(id)
+    public ClassDto getById(Long id) {
+        Course aCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
-        return ResourceMapper.toDto(resource);
+        return ClassMapper.toDto(aCourse);
     }
 
-    public ResourceDto create(ResourceDto dto) {
-        Resource resource = ResourceMapper.toEntity(dto);
-        resource.setId(null);
-        Resource saved = resourceRepository.save(resource);
-        return ResourceMapper.toDto(saved);
+    public ClassDto create(ClassDto dto) {
+        Course aCourse = ClassMapper.toEntity(dto);
+        aCourse.setId(null);
+        Course saved = courseRepository.save(aCourse);
+        return ClassMapper.toDto(saved);
     }
 
-    public ResourceDto update(Long id, ResourceDto dto) {
-        Resource existing = resourceRepository.findById(id)
+    public ClassDto update(Long id, ClassDto dto) {
+        Course existing = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
 
         existing.setName(dto.name());
 
-        Resource saved = resourceRepository.save(existing);
-        return ResourceMapper.toDto(saved);
+        Course saved = courseRepository.save(existing);
+        return ClassMapper.toDto(saved);
     }
 
     public void delete(Long id) {
-        if (!resourceRepository.existsById(id)) {
+        if (!courseRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found");
         }
-        resourceRepository.deleteById(id);
+        courseRepository.deleteById(id);
     }
 
-    public Resource getEntityById(Long id) {
-        return resourceRepository.findById(id)
+    public Course getEntityById(Long id) {
+        return courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
     }
 }

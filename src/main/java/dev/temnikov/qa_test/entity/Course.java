@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "resources")
+@Table(name = "courses")
 @Data
 @NoArgsConstructor
-public class Resource {
+public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,4 +16,7 @@ public class Resource {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private long trainerId;
 }

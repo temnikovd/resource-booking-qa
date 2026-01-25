@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
-public record SlotDto(
+public record SessionDto(
         Long id,
-        Long resourceId,
+        Long courseId,
         @Schema(example = "2026-01-24T10:00") LocalDateTime startTime,
         @Schema(example = "2026-01-24T11:00") LocalDateTime endTime
 ) {

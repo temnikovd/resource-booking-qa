@@ -19,8 +19,8 @@ public class Booking {
     private User user;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "slot_id")
-    private Slot slot;
+    @JoinColumn(name = "session_id")
+    private Session session;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
