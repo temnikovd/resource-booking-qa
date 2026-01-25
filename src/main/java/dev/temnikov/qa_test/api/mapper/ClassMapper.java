@@ -1,29 +1,29 @@
 package dev.temnikov.qa_test.api.mapper;
 
-import dev.temnikov.qa_test.api.dto.ClassDto;
+import dev.temnikov.qa_test.api.dto.CourseDto;
 import dev.temnikov.qa_test.entity.Course;
 
 public class ClassMapper {
 
-    public static ClassDto toDto(Course aCourse) {
-        if (aCourse == null) {
+    public static CourseDto toDto(Course course) {
+        if (course == null) {
             return null;
         }
-        return new ClassDto(
-                aCourse.getId(),
-                aCourse.getName(),
-                aCourse.getTrainerId()
+        return new CourseDto(
+                course.getId(),
+                course.getName(),
+                course.getTrainerId()
         );
     }
 
-    public static Course toEntity(ClassDto dto) {
+    public static Course toEntity(CourseDto dto) {
         if (dto == null) {
             return null;
         }
-        Course aCourse = new Course();
-        aCourse.setId(dto.id());
-        aCourse.setName(dto.name());
-        aCourse.setTrainerId(dto.trainerId());
-        return aCourse;
+        Course course = new Course();
+        course.setId(dto.id());
+        course.setName(dto.name());
+        course.setTrainerId(dto.trainerId());
+        return course;
     }
 }

@@ -20,6 +20,7 @@ public record UserDto(
                 example = "USER"
         )
         UserRole role,
+
         @Schema(description = "Password (write-only)", accessMode = Schema.AccessMode.WRITE_ONLY)
         String password
 ) {

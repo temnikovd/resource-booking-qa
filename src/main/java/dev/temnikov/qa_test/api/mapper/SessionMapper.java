@@ -10,10 +10,10 @@ public class SessionMapper {
         if (session == null) {
             return null;
         }
-        Long resourceId = session.getCourse() != null ? session.getCourse().getId() : null;
+        Long courseId = session.getCourse() != null ? session.getCourse().getId() : null;
         return new SessionDto(
                 session.getId(),
-                resourceId,
+                courseId,
                 session.getStartTime(),
                 session.getEndTime()
         );

@@ -17,7 +17,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
               and s.startTime < :endTime
               and s.endTime > :startTime
             """)
-    List<Session> findOverlappingSessions(@Param("courseId") Long resourceId,
+    List<Session> findOverlappingSessions(@Param("courseId") Long courseId,
                                        @Param("startTime") LocalDateTime startTime,
                                        @Param("endTime") LocalDateTime endTime);
 }
