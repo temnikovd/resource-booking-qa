@@ -56,6 +56,9 @@ public class CourseService {
             }
             trainer = userService.getOptEntityById(dto.trainerId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, "Correct trainer ID should be provided"));
+            if (!TRAINER.equals(trainer.getRole())) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, "Correct trainer ID should be provided");
+            }
         }
         Course course = CourseMapper.toEntity(dto);
         course.setTrainerId(trainer.getId());
