@@ -4,6 +4,7 @@ import dev.temnikov.qa_test.api.dto.RequestBookingDto;
 import dev.temnikov.qa_test.api.dto.ResponseBookingDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.entity.User;
+import dev.temnikov.qa_test.security.SecurityUser;
 import dev.temnikov.qa_test.service.BookingService;
 import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,12 +28,12 @@ import org.springframework.web.bind.annotation.*;
         name = "Bookings",
         description = """
                 API for booking scheduled sessions of a course.
-
+                
                 Business rules (short form):
                 - Sessions must start in the future to be bookable.
                 - Sessions must start in the future to be cancellable.
                 - Only the owning user or an ADMIN may create or cancel a booking.
-
+                
                 See RULES.md for the full list of constraints enforced by the service layer.
                 """
 )
@@ -48,12 +49,12 @@ public class BookingController {
             summary = "List bookings (paginated)",
             description = """
                     Returns paginated bookings for administrative and testing scenarios.
-
+                    
                     Query parameters:
                     - page: zero-based page index (default 0)
                     - size: page size (default 20)
                     - sort: field and direction (e.g. sort=id,asc or sort=startTime,desc)
-
+                    
                     Requires authentication (USER / TRAINER / ADMIN).
                     """
     )
@@ -74,7 +75,7 @@ public class BookingController {
             summary = "Get booking by ID",
             description = """
                     Returns a specific booking.
-
+                    
                     Requires authentication.
                     """
     )
@@ -92,13 +93,13 @@ public class BookingController {
             summary = "Create a booking",
             description = """
                     Books a session for a user.
-
+                    
                     Business rules:
                     - Session must start in the future.
                     - Caller must either be the booking owner or have ADMIN role.
                       * If userId is omitted in the payload, the current user is assumed.
                       * If userId is provided, the caller must match or be ADMIN.
-
+                    
                     Requires authentication.
                     """
     )
@@ -114,7 +115,7 @@ public class BookingController {
     public ResponseBookingDto create(
             @RequestBody RequestBookingDto dto,
             @Parameter(hidden = true)
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
+            @AuthenticationPrincipal SecurityUser principal
     ) {
         User currentUser = userService.getEntityByEmail(principal.getUsername());
         return bookingService.create(dto, currentUser);
@@ -124,10 +125,10 @@ public class BookingController {
             summary = "Update booking status",
             description = """
                     Modifies the status of a booking.
-
+                    
                     This endpoint is intentionally permissive to support testing of
                     state transitions and invalid scenarios.
-
+                    
                     Requires authentication.
                     """
     )
@@ -148,11 +149,11 @@ public class BookingController {
             summary = "Cancel a booking",
             description = """
                     Cancels a booking.
-
+                    
                     Business rules:
                     - Session must start in the future.
                     - Only owning user or ADMIN may cancel.
-
+                    
                     Requires authentication.
                     """
     )
@@ -168,7 +169,7 @@ public class BookingController {
     public ResponseBookingDto cancel(
             @PathVariable Long id,
             @Parameter(hidden = true)
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
+            @AuthenticationPrincipal SecurityUser principal
     ) {
         User currentUser = userService.getEntityByEmail(principal.getUsername());
         return bookingService.cancel(id, currentUser);
@@ -178,7 +179,7 @@ public class BookingController {
             summary = "Delete booking",
             description = """
                     Deletes a booking by ID.
-
+                    
                     Requires authentication.
                     """
     )

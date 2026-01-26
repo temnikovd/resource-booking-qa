@@ -15,6 +15,10 @@ import dev.temnikov.qa_test.api.dto.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -49,6 +53,10 @@ public class UserService {
     public User getEntityById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    public Optional<User> getOptEntityById(Long id) {
+        return userRepository.findById(id);
     }
 
     public User getEntityByEmail(String email) {

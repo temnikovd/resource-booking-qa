@@ -3,8 +3,12 @@ package dev.temnikov.qa_test.api.controller;
 import dev.temnikov.qa_test.api.dto.RequestCourseDto;
 import dev.temnikov.qa_test.api.dto.ResponseCourseDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
+import dev.temnikov.qa_test.entity.User;
+import dev.temnikov.qa_test.security.SecurityUser;
 import dev.temnikov.qa_test.service.CourseService;
+import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 public class CourseController {
 
     private final CourseService courseService;
+    private final UserService userService;
 
     @GetMapping
     @Operation(
@@ -98,8 +104,11 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "422", description = "Invalid trainer or trainerId missing")
     })
-    public ResponseCourseDto create(@RequestBody RequestCourseDto dto) {
-        return courseService.create(dto);
+    public ResponseCourseDto create(@RequestBody RequestCourseDto dto,
+                            @Parameter(hidden = true)
+                            @AuthenticationPrincipal SecurityUser principal) {
+        User currentUser = userService.getEntityByEmail(principal.getUsername());
+        return courseService.create(dto, currentUser);
     }
 
     @PutMapping("/{id}")
