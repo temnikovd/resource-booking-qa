@@ -1,8 +1,9 @@
 package dev.temnikov.qa_test.service;
 
 import dev.temnikov.qa_test.api.dto.PageResponse;
-import dev.temnikov.qa_test.api.dto.CourseDto;
-import dev.temnikov.qa_test.api.mapper.ClassMapper;
+import dev.temnikov.qa_test.api.dto.RequestCourseDto;
+import dev.temnikov.qa_test.api.dto.ResponseCourseDto;
+import dev.temnikov.qa_test.api.mapper.CourseMapper;
 import dev.temnikov.qa_test.entity.Course;
 import dev.temnikov.qa_test.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,13 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
 
-    public PageResponse<CourseDto> getAll(Pageable pageable) {
+    public PageResponse<ResponseCourseDto> getAll(Pageable pageable) {
         Page<Course> page = courseRepository.findAll(pageable);
 
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(ClassMapper::toDto)
+                        .map(CourseMapper::toDto)
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
@@ -34,27 +35,27 @@ public class CourseService {
         );
     }
 
-    public CourseDto getById(Long id) {
+    public ResponseCourseDto getById(Long id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-        return ClassMapper.toDto(course);
+        return CourseMapper.toDto(course);
     }
 
-    public CourseDto create(CourseDto dto) {
-        Course course = ClassMapper.toEntity(dto);
+    public ResponseCourseDto create(RequestCourseDto dto) {
+        Course course = CourseMapper.toEntity(dto);
         course.setId(null);
         Course saved = courseRepository.save(course);
-        return ClassMapper.toDto(saved);
+        return CourseMapper.toDto(saved);
     }
 
-    public CourseDto update(Long id, CourseDto dto) {
+    public ResponseCourseDto update(Long id, ResponseCourseDto dto) {
         Course existing = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
 
         existing.setName(dto.name());
 
         Course saved = courseRepository.save(existing);
-        return ClassMapper.toDto(saved);
+        return CourseMapper.toDto(saved);
     }
 
     public void delete(Long id) {

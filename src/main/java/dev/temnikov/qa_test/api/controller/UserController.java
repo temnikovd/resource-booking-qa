@@ -1,7 +1,8 @@
 package dev.temnikov.qa_test.api.controller;
 
 import dev.temnikov.qa_test.api.dto.PageResponse;
-import dev.temnikov.qa_test.api.dto.UserDto;
+import dev.temnikov.qa_test.api.dto.RequestUserDto;
+import dev.temnikov.qa_test.api.dto.ResponseUserDto;
 import dev.temnikov.qa_test.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,7 +52,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Users returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public PageResponse<UserDto> getAll(
+    public PageResponse<ResponseUserDto> getAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
             Pageable pageable
@@ -73,7 +74,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public UserDto getById(@PathVariable Long id) {
+    public ResponseUserDto getById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
@@ -99,8 +100,8 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden when creating ADMIN without valid secret")
     })
     @Parameter(name = "X-Admin-Secret", description = "Required only when creating or updating an ADMIN user", required = false)
-    public UserDto create(@RequestBody UserDto dto,
-                          @RequestHeader(value = "X-Admin-Secret", required = false) String adminSecret) {
+    public ResponseUserDto create(@RequestBody RequestUserDto dto,
+                                  @RequestHeader(value = "X-Admin-Secret", required = false) String adminSecret) {
         return userService.create(dto, adminSecret);
     }
 
@@ -121,9 +122,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @Parameter(name = "X-Admin-Secret", description = "Required only when creating or updating an ADMIN user", required = false)
-    public UserDto update(@PathVariable Long id,
-                          @RequestBody UserDto dto,
-                          @RequestHeader(value = "X-Admin-Secret", required = false) String adminSecret) {
+    public ResponseUserDto update(@PathVariable Long id,
+                                  @RequestBody RequestUserDto dto,
+                                  @RequestHeader(value = "X-Admin-Secret", required = false) String adminSecret) {
         return userService.update(id, dto, adminSecret);
     }
 

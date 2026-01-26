@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.api.controller;
 
-import dev.temnikov.qa_test.api.dto.CourseDto;
+import dev.temnikov.qa_test.api.dto.RequestCourseDto;
+import dev.temnikov.qa_test.api.dto.ResponseCourseDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +51,7 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "Courses returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public PageResponse<CourseDto> getAll(
+    public PageResponse<ResponseCourseDto> getAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
             Pageable pageable
@@ -72,7 +73,7 @@ public class CourseController {
             @ApiResponse(responseCode = "404", description = "Course not found")
     })
     @GetMapping("/{id}")
-    public CourseDto getById(@PathVariable Long id) {
+    public ResponseCourseDto getById(@PathVariable Long id) {
         return courseService.getById(id);
     }
 
@@ -97,7 +98,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "422", description = "Invalid trainer or trainerId missing")
     })
-    public CourseDto create(@RequestBody CourseDto dto) {
+    public ResponseCourseDto create(@RequestBody RequestCourseDto dto) {
         return courseService.create(dto);
     }
 
@@ -120,7 +121,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "404", description = "Course not found")
     })
-    public CourseDto update(@PathVariable Long id, @RequestBody CourseDto dto) {
+    public ResponseCourseDto update(@PathVariable Long id, @RequestBody ResponseCourseDto dto) {
         return courseService.update(id, dto);
     }
 

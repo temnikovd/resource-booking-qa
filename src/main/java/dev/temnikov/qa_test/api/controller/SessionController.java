@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.api.controller;
 
-import dev.temnikov.qa_test.api.dto.SessionDto;
+import dev.temnikov.qa_test.api.dto.RequestSessionDto;
+import dev.temnikov.qa_test.api.dto.ResponseSessionDto;
 import dev.temnikov.qa_test.service.SessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,7 +54,7 @@ public class SessionController {
             @ApiResponse(responseCode = "200", description = "Sessions returned"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public PageResponse<SessionDto> getAll(
+    public PageResponse<ResponseSessionDto> getAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
             Pageable pageable
@@ -75,7 +76,7 @@ public class SessionController {
             @ApiResponse(responseCode = "404", description = "Session not found")
     })
     @GetMapping("/{id}")
-    public SessionDto getById(@PathVariable Long id) {
+    public ResponseSessionDto getById(@PathVariable Long id) {
         return sessionService.getById(id);
     }
 
@@ -102,7 +103,7 @@ public class SessionController {
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "422", description = "Invalid course or invalid capacity")
     })
-    public SessionDto create(@RequestBody SessionDto dto) {
+    public ResponseSessionDto create(@RequestBody RequestSessionDto dto) {
         return sessionService.create(dto);
     }
 
@@ -127,7 +128,7 @@ public class SessionController {
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "404", description = "Session not found")
     })
-    public SessionDto update(@PathVariable Long id, @RequestBody SessionDto dto) {
+    public ResponseSessionDto update(@PathVariable Long id, @RequestBody RequestSessionDto dto) {
         return sessionService.update(id, dto);
     }
 
