@@ -4,7 +4,7 @@ import dev.temnikov.qa_test.entity.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "User DTO")
-public record UserDto(
+public record ResponseUserDto(
         @Schema(description = "User id")
         Long id,
 
@@ -19,9 +19,6 @@ public record UserDto(
                 required = true,
                 example = "USER"
         )
-        UserRole role,
-
-        @Schema(description = "Password (write-only)", accessMode = Schema.AccessMode.WRITE_ONLY)
-        String password
+        UserRole role
 ) {
 }

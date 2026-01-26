@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.service;
 
-import dev.temnikov.qa_test.api.dto.UserDto;
+import dev.temnikov.qa_test.api.dto.RequestUserDto;
+import dev.temnikov.qa_test.api.dto.ResponseUserDto;
 import dev.temnikov.qa_test.api.mapper.UserMapper;
 import dev.temnikov.qa_test.config.AdminConfig;
 import dev.temnikov.qa_test.entity.User;
@@ -26,7 +27,7 @@ public class UserService {
     private final AdminConfig adminConfig;
 
 
-    public PageResponse<UserDto> getAll(Pageable pageable) {
+    public PageResponse<ResponseUserDto> getAll(Pageable pageable) {
         Page<User> page = userRepository.findAll(pageable);
 
         return new PageResponse<>(
@@ -43,7 +44,7 @@ public class UserService {
     }
 
 
-    public UserDto getById(Long id) {
+    public ResponseUserDto getById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return UserMapper.toDto(user);
@@ -63,7 +64,7 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    public UserDto create(UserDto dto, String adminSecretFromRequest) {
+    public ResponseUserDto create(RequestUserDto dto, String adminSecretFromRequest) {
         if (dto.password() == null || dto.password().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -88,7 +89,7 @@ public class UserService {
         return UserMapper.toDto(saved);
     }
 
-    public UserDto update(Long id, UserDto dto, String adminSecretFromRequest) {
+    public ResponseUserDto update(Long id, RequestUserDto dto, String adminSecretFromRequest) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 

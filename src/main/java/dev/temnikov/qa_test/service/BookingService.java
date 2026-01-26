@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.service;
 
-import dev.temnikov.qa_test.api.dto.BookingDto;
+import dev.temnikov.qa_test.api.dto.RequestBookingDto;
+import dev.temnikov.qa_test.api.dto.ResponseBookingDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.mapper.BookingMapper;
 import dev.temnikov.qa_test.entity.*;
@@ -23,13 +24,13 @@ public class BookingService {
     private final UserService userService;
 
 
-    public PageResponse<BookingDto> getAll(Pageable pageable) {
+    public PageResponse<ResponseBookingDto> getAll(Pageable pageable) {
         Page<Booking> page = bookingRepository.findAll(pageable);
 
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(BookingMapper::toDto)
+                        .map(BookingMapper::toResponseDto)
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
@@ -40,17 +41,17 @@ public class BookingService {
     }
 
 
-    public BookingDto getById(Long id) {
+    public ResponseBookingDto getById(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        return BookingMapper.toDto(booking);
+        return BookingMapper.toResponseDto(booking);
     }
 
     /**
      * Only owner (dto.userId) or ADMIN can create booking.
      * Session must be in the future.
      */
-    public BookingDto create(BookingDto dto, User currentUser) {
+    public ResponseBookingDto create(RequestBookingDto dto, User currentUser) {
         if (dto.sessionId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "sessionId is required");
         }
@@ -84,14 +85,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
-        return BookingMapper.toDto(saved);
+        return BookingMapper.toResponseDto(saved);
     }
 
     /**
      * Only owner or ADMIN may cancel.
      * Session must be in the future to cancel.
      */
-    public BookingDto cancel(Long id, User currentUser) {
+    public ResponseBookingDto cancel(Long id, User currentUser) {
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current user is required");
         }
@@ -119,13 +120,13 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
 
         Booking saved = bookingRepository.save(booking);
-        return BookingMapper.toDto(saved);
+        return BookingMapper.toResponseDto(saved);
     }
 
     /**
      * Simple status update (no owner/admin rules here unless you want to add them later).
      */
-    public BookingDto updateStatus(Long id, String status) {
+    public ResponseBookingDto updateStatus(Long id, String status) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
 
@@ -138,7 +139,7 @@ public class BookingService {
 
         booking.setStatus(newStatus);
         Booking saved = bookingRepository.save(booking);
-        return BookingMapper.toDto(saved);
+        return BookingMapper.toResponseDto(saved);
     }
 
     private boolean isOwnerOrAdmin(Long ownerId, User currentUser) {
