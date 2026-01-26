@@ -1,17 +1,18 @@
 package dev.temnikov.qa_test.api.mapper;
 
-import dev.temnikov.qa_test.api.dto.SessionDto;
+import dev.temnikov.qa_test.api.dto.RequestSessionDto;
+import dev.temnikov.qa_test.api.dto.ResponseSessionDto;
 import dev.temnikov.qa_test.entity.Course;
 import dev.temnikov.qa_test.entity.Session;
 
 public class SessionMapper {
 
-    public static SessionDto toDto(Session session) {
+    public static ResponseSessionDto toDto(Session session) {
         if (session == null) {
             return null;
         }
         Long courseId = session.getCourse() != null ? session.getCourse().getId() : null;
-        return new SessionDto(
+        return new ResponseSessionDto(
                 session.getId(),
                 courseId,
                 session.getStartTime(),
@@ -20,7 +21,7 @@ public class SessionMapper {
     }
 
 
-    public static Session toEntity(SessionDto dto, Course course) {
+    public static Session toEntity(RequestSessionDto dto, Course course) {
         if (dto == null) {
             return null;
         }

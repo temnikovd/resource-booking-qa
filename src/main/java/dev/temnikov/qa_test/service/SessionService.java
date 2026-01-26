@@ -1,7 +1,8 @@
 package dev.temnikov.qa_test.service;
 
 import dev.temnikov.qa_test.api.dto.PageResponse;
-import dev.temnikov.qa_test.api.dto.SessionDto;
+import dev.temnikov.qa_test.api.dto.RequestSessionDto;
+import dev.temnikov.qa_test.api.dto.ResponseSessionDto;
 import dev.temnikov.qa_test.api.mapper.SessionMapper;
 import dev.temnikov.qa_test.entity.Course;
 import dev.temnikov.qa_test.entity.Session;
@@ -24,7 +25,7 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final CourseService courseService;
 
-    public PageResponse<SessionDto> getAll(Pageable pageable) {
+    public PageResponse<ResponseSessionDto> getAll(Pageable pageable) {
         Page<Session> page = sessionRepository.findAll(pageable);
 
         return new PageResponse<>(
@@ -40,13 +41,13 @@ public class SessionService {
         );
     }
 
-    public SessionDto getById(Long id) {
+    public ResponseSessionDto getById(Long id) {
         Session session = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
         return SessionMapper.toDto(session);
     }
 
-    public SessionDto create(SessionDto dto) {
+    public ResponseSessionDto create(RequestSessionDto dto) {
         if (dto.courseId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "courseId is required");
         }
@@ -72,7 +73,7 @@ public class SessionService {
         return SessionMapper.toDto(saved);
     }
 
-    public SessionDto update(Long id, SessionDto dto) {
+    public ResponseSessionDto update(Long id, RequestSessionDto dto) {
         Session existing = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
 

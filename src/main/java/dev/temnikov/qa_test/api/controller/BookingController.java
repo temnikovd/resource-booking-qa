@@ -1,6 +1,7 @@
 package dev.temnikov.qa_test.api.controller;
 
-import dev.temnikov.qa_test.api.dto.BookingDto;
+import dev.temnikov.qa_test.api.dto.RequestBookingDto;
+import dev.temnikov.qa_test.api.dto.ResponseBookingDto;
 import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.entity.User;
 import dev.temnikov.qa_test.service.BookingService;
@@ -61,7 +62,7 @@ public class BookingController {
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
     @GetMapping
-    public PageResponse<BookingDto> getAll(
+    public PageResponse<ResponseBookingDto> getAll(
             @ParameterObject
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC)
             Pageable pageable
@@ -83,7 +84,7 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @GetMapping("/{id}")
-    public BookingDto getById(@PathVariable Long id) {
+    public ResponseBookingDto getById(@PathVariable Long id) {
         return bookingService.getById(id);
     }
 
@@ -103,15 +104,15 @@ public class BookingController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Booking created",
-                    content = @Content(schema = @Schema(implementation = BookingDto.class))),
+                    content = @Content(schema = @Schema(implementation = ResponseBookingDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input or session is not in the future"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Not allowed to create booking for the specified user")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto create(
-            @RequestBody BookingDto dto,
+    public ResponseBookingDto create(
+            @RequestBody RequestBookingDto dto,
             @Parameter(hidden = true)
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
     ) {
@@ -132,14 +133,14 @@ public class BookingController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status updated",
-                    content = @Content(schema = @Schema(implementation = BookingDto.class))),
+                    content = @Content(schema = @Schema(implementation = ResponseBookingDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid status value"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @PatchMapping("/{id}/status")
-    public BookingDto updateStatus(@PathVariable Long id,
-                                   @RequestParam("status") String status) {
+    public ResponseBookingDto updateStatus(@PathVariable Long id,
+                                           @RequestParam("status") String status) {
         return bookingService.updateStatus(id, status);
     }
 
@@ -157,14 +158,14 @@ public class BookingController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Booking cancelled",
-                    content = @Content(schema = @Schema(implementation = BookingDto.class))),
+                    content = @Content(schema = @Schema(implementation = ResponseBookingDto.class))),
             @ApiResponse(responseCode = "400", description = "Session is not in the future"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "Not allowed to cancel booking"),
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @PatchMapping("/{id}/cancel")
-    public BookingDto cancel(
+    public ResponseBookingDto cancel(
             @PathVariable Long id,
             @Parameter(hidden = true)
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
