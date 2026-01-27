@@ -3,6 +3,7 @@ package dev.temnikov.qa_test.config;
 import dev.temnikov.qa_test.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -19,22 +20,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 public class SecurityConfig {
 
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    UserDetailsService userDetailsService,
                                                    JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .securityMatcher("/api/**")
                 .userDetailsService(userDetailsService)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/info",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/api/auth/login"
-                        ).permitAll()
                         // public registration
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
 
@@ -54,6 +49,52 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain uiSecurity(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(
+                        "/",
+                        "/login",
+                        "/register",
+                        "/logout",
+                        "/ui/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/actuator/**"
+                )
+//                .csrf(csrf -> csrf.e())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/register",
+                                "/logout",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/actuator/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/ui/home", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                );
 
         return http.build();
     }

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout :: layout(~{::body})}">
+<body>
+
+<div>
+    <h2>Home</h2>
+    <p>Welcome to your dashboard.</p>
+
+    <div class="mt-20">
+        <p>Useful links:</p>
+        <ul>
+            <li><a href="/swagger-ui/index.html">Swagger (API)</a></li>
+            <li><a href="/">Main page</a></li>
+            <!-- later add: <li><a href="/ui/calendar">Calendar</a></li> -->
+            <!-- later add: <li><a href="/ui/bookings">My bookings</a></li> -->
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
