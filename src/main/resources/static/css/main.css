@@ -1,0 +1,153 @@
+/* Base */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, sans-serif;
+    background-color: #f7f7f7;
+    color: #111;
+}
+
+/* Links */
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #0066cc; /* Same as non-visited */
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Layout containers */
+.content {
+    padding: 20px;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #222;
+    color: #eee;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-left {
+    flex: 1;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.navbar a,
+.user-name,
+.logout-form {
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Links inside navbar */
+.navbar a {
+    color: #eee;
+    padding: 4px 6px;
+    border-radius: 3px;
+}
+
+.navbar a:visited {
+    color: #eee;
+}
+
+.navbar a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    text-decoration: none;
+}
+
+/* Logout form in navbar */
+.logout-form {
+    margin: 0;
+}
+
+/* User info area (optional, if you use it somewhere else) */
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info form {
+    display: inline;
+    margin-left: 12px;
+}
+
+/* Buttons */
+button {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #0055aa;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    padding: 6px 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: 2px solid #66aaff;
+}
+
+/* Forms */
+form {
+    margin-top: 10px;
+}
+
+/* Utility spacing */
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+
+/* Messages (for register/login feedback) */
+.alert {
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.alert-success {
+    background-color: #d9f2d9;
+    border: 1px solid #8ac88a;
+    color: #2f672f;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #ce868d;
+    color: #842029;
+}
+
+/* Lists */
+ul {
+    padding-left: 18px;
+}

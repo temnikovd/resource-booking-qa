@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <title>QA Test App</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="navbar-left">
+        QA Test Application
+    </div>
+
+    <div class="navbar-right">
+        <span sec:authorize="isAnonymous()">
+            <a href="/login">Log in</a>
+            <a href="/register">Register</a>
+        </span>
+
+        <span sec:authorize="isAuthenticated()">
+            <a href="/">Home</a>
+            <span class="user-name"
+                  th:text="${#authentication.principal.user.fullName}"></span>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Log out</button>
+            </form>
+        </span>
+    </div>
+</header>
+
+
+<main class="content">
+    <div th:insert="${content}"></div>
+</main>
+
+</body>
+</html>
