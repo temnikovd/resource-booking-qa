@@ -3,7 +3,6 @@ package dev.temnikov.qa_test.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +43,13 @@ public class JwtTokenService {
                 .compact();
     }
 
+    public long extractExpirationEpochSeconds(String token) {
+        return getClaims(token)
+                .getExpiration()
+                .toInstant()
+                .getEpochSecond();
+    }
+
     public String extractUsername(String token) {
         return getClaims(token).getSubject();
     }
@@ -66,9 +72,5 @@ public class JwtTokenService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    private String toBase64(String value) {
-        return java.util.Base64.getEncoder().encodeToString(value.getBytes());
     }
 }

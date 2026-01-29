@@ -55,6 +55,7 @@ public class AuthController {
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
+        response.setExpiresAt(jwtTokenService.extractExpirationEpochSeconds(token));
         return response;
     }
 
@@ -67,5 +68,6 @@ public class AuthController {
     @Data
     public static class AuthResponse {
         private String token;
+        private long expiresAt; // epoch seconds
     }
 }
