@@ -108,7 +108,8 @@ public class BookingController {
                     content = @Content(schema = @Schema(implementation = ResponseBookingDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input or session is not in the future"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
-            @ApiResponse(responseCode = "403", description = "Not allowed to create booking for the specified user")
+            @ApiResponse(responseCode = "403", description = "Not allowed to create booking for the specified user"),
+            @ApiResponse(responseCode = "409", description = "Session capacity reached")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

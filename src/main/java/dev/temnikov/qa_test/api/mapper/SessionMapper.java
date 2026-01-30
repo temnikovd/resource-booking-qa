@@ -7,17 +7,24 @@ import dev.temnikov.qa_test.entity.Session;
 
 public class SessionMapper {
 
-    public static ResponseSessionDto toDto(Session session) {
+    public static ResponseSessionDto toDto(Session session, int currentBookings) {
         if (session == null) {
             return null;
         }
         Long courseId = session.getCourse() != null ? session.getCourse().getId() : null;
+
         return new ResponseSessionDto(
                 session.getId(),
                 courseId,
                 session.getStartTime(),
-                session.getEndTime()
+                session.getEndTime(),
+                session.getCapacity(),
+                currentBookings
         );
+    }
+
+    public static ResponseSessionDto toDto(Session session) {
+        return toDto(session, 0);
     }
 
 
@@ -29,6 +36,7 @@ public class SessionMapper {
         session.setCourse(course);
         session.setStartTime(dto.startTime());
         session.setEndTime(dto.endTime());
+        session.setCapacity(dto.capacity());
         return session;
     }
 }

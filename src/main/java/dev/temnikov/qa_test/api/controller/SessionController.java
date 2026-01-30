@@ -91,14 +91,14 @@ public class SessionController {
                     - Sessions must start in the future.
                     - Sessions must not overlap for the same course.
                     - Course must exist.
-                    - (future) Capacity must be >= 1 if provided.
+                    - Capacity is optional and must be >= 1 if provided. Default value is 5
 
                     Access: ADMIN only.
                     """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Session created"),
-            @ApiResponse(responseCode = "400", description = "Validation error (past start or overlapping session)"),
+            @ApiResponse(responseCode = "400", description = "Validation error (past start or overlapping session, or negative capacity)"),
             @ApiResponse(responseCode = "401", description = "Authentication required"),
             @ApiResponse(responseCode = "403", description = "ADMIN role required"),
             @ApiResponse(responseCode = "422", description = "Invalid course or invalid capacity")

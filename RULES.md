@@ -158,6 +158,50 @@ PUT /api/sessions/{id}
 |---------------------------------------------------------------------|-----------------|
 | Create/update overlapping sessions for the same course              | 409 Conflict    |
 
+## Rule 6 — Session Capacity
+
+Each Session has a capacity that limits the number of active bookings.
+
+Rules:
+
+* capacity is required in the model and must be a positive integer (capacity >= 1)
+* default capacity is 5 when a session is created without an explicit capacity
+* capacity can be provided on session creation and on update
+
+Validation:
+
+* if capacity < 1, the request must fail with 400 Bad Request
+
+Response:
+
+* each session returned by the API must include:
+
+    * capacity
+    * currentBookings
+
+currentBookings:
+
+* currentBookings represents the number of active bookings for the session
+* only active bookings are counted (PENDING and CONFIRMED)
+* cancelled bookings are not counted
+
+### Allowed
+
+| Scenario                                          | Expected Result |
+| ------------------------------------------------- | --------------- |
+| Create session without capacity (default applied) | 201 Created     |
+| Create session with capacity > 0                  | 201 Created     |
+| Update session capacity to a higher value         | 200 OK          |
+
+### Forbidden
+
+| Scenario                                 | Expected Result |
+| ---------------------------------------- | --------------- |
+| Create session with capacity = 0         | 400 Bad Request |
+| Create session with capacity < 0         | 400 Bad Request |
+| Update session capacity to 0 or negative | 400 Bad Request |
+
+---
 
 # Booking Rules (Combined Block)
 
@@ -240,6 +284,43 @@ Ownership and role restrictions apply to creation and cancellation.
 |---------------------------------------------------------------------|-----------------|
 | User creates booking for another user (not admin)                   | 403 Forbidden   |
 | User cancels booking for another user (not admin)                   | 403 Forbidden   |
+
+### Rule B4 — Capacity Limit
+
+A booking cannot be created if the session is already full.
+
+Rules:
+
+* when creating a booking, the system must compare:
+
+    * currentBookings for the session
+    * session capacity
+* if currentBookings >= capacity, booking creation must be rejected
+
+Expected behavior:
+
+* if the session is full, the request must fail with 409 Conflict
+* the error message should indicate that the session capacity has been reached
+
+Notes:
+
+* active bookings are bookings with status PENDING or CONFIRMED
+* cancelled bookings do not occupy session capacity
+
+### Allowed
+
+| Scenario                                                  | Expected Result |
+| --------------------------------------------------------- | --------------- |
+| Create booking when currentBookings < capacity            | 201 Created     |
+| Create booking when capacity is exactly 1 and no bookings | 201 Created     |
+
+
+### Forbidden
+
+| Scenario                                        | Expected Result |
+| ----------------------------------------------- | --------------- |
+| Create booking when currentBookings == capacity | 409 Conflict    |
+| Create booking when currentBookings > capacity  | 409 Conflict    |
 
 
 ## Rule 9 — Only Admin Users May Manage Sessions
