@@ -4,8 +4,10 @@ import dev.temnikov.qa_test.api.dto.PageResponse;
 import dev.temnikov.qa_test.api.dto.RequestSessionDto;
 import dev.temnikov.qa_test.api.dto.ResponseSessionDto;
 import dev.temnikov.qa_test.api.mapper.SessionMapper;
+import dev.temnikov.qa_test.entity.BookingStatus;
 import dev.temnikov.qa_test.entity.Course;
 import dev.temnikov.qa_test.entity.Session;
+import dev.temnikov.qa_test.repository.BookingRepository;
 import dev.temnikov.qa_test.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,21 +19,27 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final BookingRepository bookingRepository;
     private final CourseService courseService;
 
     public PageResponse<ResponseSessionDto> getAll(Pageable pageable) {
         Page<Session> page = sessionRepository.findAll(pageable);
 
+        Map<Long, Integer> currentBookingsBySessionId = loadCurrentBookings(page.getContent());
+
         return new PageResponse<>(
-                page.getContent()
-                        .stream()
-                        .map(SessionMapper::toDto)
+                page.getContent().stream()
+                        .map(s -> SessionMapper.toDto(s, currentBookingsBySessionId.getOrDefault(s.getId(), 0)))
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
@@ -44,7 +52,40 @@ public class SessionService {
     public ResponseSessionDto getById(Long id) {
         Session session = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
-        return SessionMapper.toDto(session);
+
+        int currentBookings = (int) bookingRepository.countBySessionIdAndStatusIn(
+                session.getId(),
+                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
+        );
+
+        return SessionMapper.toDto(session, currentBookings);
+    }
+
+    private Map<Long, Integer> loadCurrentBookings(List<Session> sessions) {
+        if (sessions == null || sessions.isEmpty()) {
+            return Map.of();
+        }
+
+        Set<Long> sessionIds = sessions.stream()
+                .map(Session::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (sessionIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<BookingRepository.SessionBookingCount> counts =
+                bookingRepository.countBySessionIdsAndStatusIn(
+                        sessionIds,
+                        List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
+                );
+
+        return counts.stream()
+                .collect(Collectors.toMap(
+                        BookingRepository.SessionBookingCount::getSessionId,
+                        c -> (int) c.getCount()
+                ));
     }
 
     public ResponseSessionDto create(RequestSessionDto dto) {
@@ -63,11 +104,16 @@ public class SessionService {
         validateSessionTimeRange(start, end);
         validateSessionInFuture(start);
         validateNoOverlap(course.getId(), start, end, null);
+        int capacity = dto.capacity() != null ? dto.capacity() : Session.DEFAULT_CAPACITY;
+
+        validateCapacity(capacity);
+
 
         Session session = new Session();
         session.setCourse(course);
         session.setStartTime(start);
         session.setEndTime(end);
+        session.setCapacity(capacity);
 
         Session saved = sessionRepository.save(session);
         return SessionMapper.toDto(saved);
@@ -87,11 +133,15 @@ public class SessionService {
 
         start = normalizeToMinutes(start);
         end = normalizeToMinutes(end);
+        int capacity = dto.capacity() != null ? dto.capacity() : existing.getCapacity();
+
 
         validateSessionTimeRange(start, end);
         validateSessionInFuture(start);
         validateNoOverlap(course.getId(), start, end, existing.getId());
+        validateCapacity(capacity);
 
+        existing.setCapacity(capacity);
         existing.setCourse(course);
         existing.setStartTime(start);
         existing.setEndTime(end);
@@ -137,6 +187,15 @@ public class SessionService {
             );
         }
     }
+    private void validateCapacity(int capacity) {
+        if (capacity <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Session capacity must be greater than 0"
+            );
+        }
+    }
+
 
     private void validateNoOverlap(Long courseId,
                                    LocalDateTime start,

@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Session {
 
+    public static final int DEFAULT_CAPACITY = 5;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,4 +27,7 @@ public class Session {
 
     @Column(nullable = false)
     private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    private int capacity = DEFAULT_CAPACITY;
 }

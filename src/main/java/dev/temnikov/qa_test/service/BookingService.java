@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +78,15 @@ public class BookingService {
                     HttpStatus.BAD_REQUEST,
                     "Session must be in the future to create booking"
             );
+        }
+
+        long activeBookings = bookingRepository.countBySessionIdAndStatusIn(
+                session.getId(),
+                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)
+        );
+
+        if (activeBookings >= session.getCapacity()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Session capacity reached");
         }
 
         Booking booking = new Booking();
