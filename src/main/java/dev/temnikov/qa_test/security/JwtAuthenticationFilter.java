@@ -7,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,21 +53,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = header.substring(7).trim();
         if (token.isEmpty()) {
-            sendUnauthorized(response, "invalid_token", "Bearer token is missing");
+            sendUnauthorized(request, response, "Bearer token is missing");
             return;
         }
 
         try {
             String username = jwtTokenService.extractUsername(token);
             if (username == null || username.isBlank()) {
-                sendUnauthorized(response, "invalid_token", "Token subject is missing");
+                sendUnauthorized(request, response, "Token subject is missing");
                 return;
             }
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (!jwtTokenService.isTokenValid(token, userDetails)) {
-                sendUnauthorized(response, "invalid_token", "Token is invalid");
+                sendUnauthorized(request, response, "Token is invalid");
                 return;
             }
 
@@ -85,20 +84,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException ex) {
-            sendUnauthorized(response, "token_expired", "Token has expired");
+            sendUnauthorized(request, response, "Token has expired");
         } catch (JwtException | IllegalArgumentException ex) {
-            sendUnauthorized(response, "invalid_token", "Token is invalid");
+            sendUnauthorized(request, response, "Token is invalid");
         }
     }
 
-    private void sendUnauthorized(HttpServletResponse response, String code, String message) throws IOException {
+    private void sendUnauthorized(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  String message) throws IOException {
+
         if (response.isCommitted()) {
             return;
         }
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer error=\"" + code + "\"");
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write("{\"error\":\"" + code + "\",\"message\":\"" + message + "\"}");
+        response.setContentType("application/json");
+
+        String body = """
+                {"timestamp":"%s","message":"%s","path":"%s"}
+                """.formatted(
+                java.time.Instant.now(),
+                escape(message),
+                escape(request.getRequestURI())
+        );
+
+        response.getWriter().write(body);
     }
+
+    private String escape(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
 }
